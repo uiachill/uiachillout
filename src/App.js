@@ -29,10 +29,11 @@ export default function App() {
 
   const [nhanVien, setNhanVien] = useState(() => JSON.parse(localStorage.getItem('nhanVien')) || [
     { Ma_nhan_vien: 'NV01', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên' },
-    { Ma_nhan_vien: 'NV02', Ho_ten: 'Trần Trà My', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 12000000, Chuc_vu: 'Tester' },
-    { Ma_nhan_vien: 'NV03', Ho_ten: 'Lê Tuấn Minh', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 18000000, Chuc_vu: 'Trưởng phòng' },
-    { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Thị Lan', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'HR' },
-    { Ma_nhan_vien: 'NV05', Ho_ten: 'Hoàng Văn B', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales' }
+    { Ma_nhan_vien: 'NV02', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 12000000, Chuc_vu: 'Tester' },
+    { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 18000000, Chuc_vu: 'Trưởng phòng' },
+    { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'HR' },
+    { Ma_nhan_vien: 'NV05', Ho_ten: 'Ngô Thái Hòa', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales' },
+    { Ma_nhan_vien: 'NV06', Ho_ten: 'Nguyễn Minh Tiến', Phong_ban: 'MR BEAST', Luong_co_ban: 1111000000, Chuc_vu: 'Sales' }
   ]);
 
   const [chamCong, setChamCong] = useState(() => JSON.parse(localStorage.getItem('chamCong')) || nhanVien.map(nv => ({
@@ -182,7 +183,7 @@ export default function App() {
       <div className="min-h-screen flex items-center justify-center bg-slate-900 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-blue-900 to-slate-900">
         <div className="bg-white p-10 rounded-3xl shadow-2xl w-[450px] border border-white/20 backdrop-blur-sm">
           <div className="flex justify-center mb-6"><div className="p-4 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/50"><Lock className="w-10 h-10 text-white" /></div></div>
-          <h1 className="text-3xl font-black text-center text-slate-800 mb-2">SmartPayroll AI</h1>
+          <h1 className="text-3xl font-black text-center text-slate-800 mb-2">CSDL lớp 11A4</h1>
           <p className="text-center text-slate-500 mb-8 font-medium">Đồ án CSDL - Hệ thống ERP Doanh Nghiệp</p>
           <div className="space-y-4">
             <button onClick={() => setCurrentUser({ id: 'ADMIN', name: 'Giám Đốc CSDL', role: 'admin' })} className="w-full bg-slate-800 hover:bg-slate-900 text-white py-4 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 shadow-xl flex justify-center items-center gap-2">
