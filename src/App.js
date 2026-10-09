@@ -43,7 +43,6 @@ export default function App() {
     { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 18000000, Chuc_vu: 'Trưởng phòng', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'HR', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV05', Ho_ten: 'Ngô Thái Hòa', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV06', Ho_ten: 'Nguyễn Minh Tiến', Phong_ban: 'MR BEAST', Luong_co_ban: 1111000000, Chuc_vu: 'CEO', Mat_khau: '123456' }
   ]);
 
   const [chamCong, setChamCong] = useState(() => JSON.parse(localStorage.getItem('chamCong')) || nhanVien.map(nv => ({
@@ -453,7 +452,7 @@ export default function App() {
                     <input type="text" value={formData.Chuc_vu} onChange={e => setFormData({ ...formData, Chuc_vu: e.target.value })} className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700" placeholder="VD: Lập trình viên" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2 text-red-500">Mật Khẩu Đăng Nhập</label>
+                    <label className=" block text-xs font-bold text-slate-500 uppercase mb-2 text-red-500">Mật Khẩu Đăng Nhập</label>
                     <input type="text" value={formData.Mat_khau} onChange={e => setFormData({ ...formData, Mat_khau: e.target.value })} className="w-full p-3 bg-white border border-red-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500 font-bold text-red-600" placeholder="Mật khẩu cấp cho NV" />
                   </div>
                 </div>
