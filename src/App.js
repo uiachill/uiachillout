@@ -19,21 +19,31 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  // --- STATE CHO ĐĂNG NHẬP ---
+  const [loginId, setLoginId] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
-  const [formData, setFormData] = useState({ Ma_nhan_vien: '', Ho_ten: '', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 10000000 });
+
+  // Đã thêm Chuc_vu và Mat_khau vào formData mặc định
+  const [formData, setFormData] = useState({
+    Ma_nhan_vien: '', Ho_ten: '', Phong_ban: 'Phòng Kỹ Thuật',
+    Chuc_vu: 'Nhân viên', Luong_co_ban: 10000000, Mat_khau: '123456'
+  });
 
   const [phongBan] = useState(() => JSON.parse(localStorage.getItem('phongBan')) || [
     { id: 'PB01', name: 'Phòng Kỹ Thuật' }, { id: 'PB02', name: 'Phòng Kinh Doanh' }, { id: 'PB03', name: 'Phòng Nhân Sự' }
   ]);
 
+  // Đã thêm mật khẩu mặc định (123456) cho toàn bộ nhân viên cũ
   const [nhanVien, setNhanVien] = useState(() => JSON.parse(localStorage.getItem('nhanVien')) || [
-    { Ma_nhan_vien: 'NV01', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên' },
-    { Ma_nhan_vien: 'NV02', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 12000000, Chuc_vu: 'Tester' },
-    { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 18000000, Chuc_vu: 'Trưởng phòng' },
-    { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'HR' },
-    { Ma_nhan_vien: 'NV05', Ho_ten: 'Ngô Thái Hòa', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales' },
-    { Ma_nhan_vien: 'NV06', Ho_ten: 'Nguyễn Minh Tiến', Phong_ban: 'MR BEAST', Luong_co_ban: 1111000000, Chuc_vu: 'Sales' }
+    { Ma_nhan_vien: 'NV01', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV02', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 12000000, Chuc_vu: 'Tester', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 18000000, Chuc_vu: 'Trưởng phòng', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'HR', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV05', Ho_ten: 'Ngô Thái Hòa', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV06', Ho_ten: 'Nguyễn Minh Tiến', Phong_ban: 'MR BEAST', Luong_co_ban: 1111000000, Chuc_vu: 'CEO', Mat_khau: '123456' }
   ]);
 
   const [chamCong, setChamCong] = useState(() => JSON.parse(localStorage.getItem('chamCong')) || nhanVien.map(nv => ({
@@ -57,6 +67,23 @@ export default function App() {
     localStorage.setItem('hoaDon', JSON.stringify(hoaDon));
     localStorage.setItem('bangLuong', JSON.stringify(bangLuong));
   }, [nhanVien, chamCong, hoaDon, bangLuong]);
+
+  // --- HÀM XỬ LÝ ĐĂNG NHẬP ---
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // 1. Kiểm tra tài khoản Admin mặc định
+    if (loginId === 'ADMIN' && loginPassword === 'admin') {
+      setCurrentUser({ id: 'ADMIN', name: 'Giám Đốc CSDL', role: 'admin' });
+      return;
+    }
+    // 2. Kiểm tra tài khoản Nhân viên trong CSDL
+    const user = nhanVien.find(nv => nv.Ma_nhan_vien === loginId && nv.Mat_khau === loginPassword);
+    if (user) {
+      setCurrentUser({ id: user.Ma_nhan_vien, name: user.Ho_ten, role: 'user' });
+    } else {
+      alert('Sai Mã nhân viên hoặc Mật khẩu. Vui lòng thử lại!');
+    }
+  };
 
   const handleTinhLuong = () => {
     const ketQua = nhanVien.map(nv => {
@@ -155,7 +182,6 @@ export default function App() {
     setChamCong(chamCong.map(cc => cc.Ma_nhan_vien === id ? { ...cc, [field]: Number(value) } : cc));
   };
 
-  // Các hàm quản lý Hóa đơn (Chỉnh doanh thu)
   const handleAddHoaDon = () => {
     const maHD = `HD0${hoaDon.length + 1}`;
     const maNV = prompt("Nhập Mã Nhân Viên lập hóa đơn (VD: NV03):");
@@ -171,28 +197,39 @@ export default function App() {
     }
   };
 
-  // Tính toán số liệu trực tiếp cho Dashboard
   const quyLuongDuToan = bangLuong.length > 0
     ? bangLuong.reduce((s, i) => s + i.Tong_Thu_Nhap, 0)
-    : nhanVien.reduce((s, nv) => s + nv.Luong_co_ban, 0); // Dự toán nếu chưa chạy AI
+    : nhanVien.reduce((s, nv) => s + nv.Luong_co_ban, 0);
   const tongDoanhThu = hoaDon.reduce((s, h) => s + h.Gia_tri, 0);
 
-
+  // --- MÀN HÌNH ĐĂNG NHẬP MỚI ---
   if (!currentUser) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-blue-900 to-slate-900">
         <div className="bg-white p-10 rounded-3xl shadow-2xl w-[450px] border border-white/20 backdrop-blur-sm">
           <div className="flex justify-center mb-6"><div className="p-4 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/50"><Lock className="w-10 h-10 text-white" /></div></div>
           <h1 className="text-3xl font-black text-center text-slate-800 mb-2">CSDL lớp 11A4</h1>
-          <p className="text-center text-slate-500 mb-8 font-medium">Đồ án CSDL - Hệ thống ERP Doanh Nghiệp</p>
-          <div className="space-y-4">
-            <button onClick={() => setCurrentUser({ id: 'ADMIN', name: 'Giám Đốc CSDL', role: 'admin' })} className="w-full bg-slate-800 hover:bg-slate-900 text-white py-4 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 shadow-xl flex justify-center items-center gap-2">
-              <Lock className="w-5 h-5" /> Đăng nhập quyền Admin
+          <p className="text-center text-slate-500 mb-8 font-medium">Hệ thống Quản lý & Xác thực</p>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Mã Nhân Viên</label>
+              <input type="text" value={loginId} onChange={e => setLoginId(e.target.value)} required placeholder="VD: ADMIN hoặc NV01"
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-semibold" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Mật Khẩu</label>
+              <input type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required placeholder="Nhập mật khẩu..."
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-semibold" />
+            </div>
+            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 shadow-xl flex justify-center items-center gap-2 mt-2">
+              <Lock className="w-5 h-5" /> Đăng Nhập
             </button>
-            <button onClick={() => setCurrentUser({ id: 'NV01', name: 'Nguyễn Nhật Minh', role: 'user' })} className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-4 rounded-xl font-bold transition-all hover:scale-105 active:scale-95 shadow-md flex justify-center items-center gap-2">
-              <Users className="w-5 h-5" /> Đăng nhập NV01 (User)
-            </button>
-            <p className="text-center text-xs text-slate-400 mt-6 pt-4 border-t border-slate-100">Bảo mật đa tầng & Mã hóa đầu cuối</p>
+          </form>
+
+          <div className="text-center text-xs text-slate-400 mt-8 pt-4 border-t border-slate-100">
+            <p className="mb-1">Tài khoản Quản lý: ID <b>ADMIN</b> | Pass: <b>admin</b></p>
+            <p>Tài khoản Nhân viên: ID <b>NV01</b> | Pass: <b>123456</b></p>
           </div>
         </div>
       </div>
@@ -236,7 +273,7 @@ export default function App() {
               <p className="text-sm font-bold text-white truncate">{currentUser.name}</p>
               <p className="text-xs text-slate-400 truncate">{currentUser.id}</p>
             </div>
-            <button onClick={() => setCurrentUser(null)} className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors shrink-0"><LogOut className="w-5 h-5" /></button>
+            <button onClick={() => { setCurrentUser(null); setLoginId(''); setLoginPassword(''); }} className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors shrink-0"><LogOut className="w-5 h-5" /></button>
           </div>
           <p className="text-[10px] text-slate-500 text-center font-medium uppercase tracking-widest">Đồ án CSDL © Nhóm Tuấn Minh</p>
         </div>
@@ -325,7 +362,7 @@ export default function App() {
                   {phongBan.map(pb => <option key={pb.id} value={pb.name}>{pb.name}</option>)}
                 </select>
                 {currentUser.role === 'admin' && (
-                  <button onClick={() => { setEditingEmployee(null); setFormData({ Ma_nhan_vien: '', Ho_ten: '', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 10000000 }); setIsModalOpen(true); }}
+                  <button onClick={() => { setEditingEmployee(null); setFormData({ Ma_nhan_vien: '', Ho_ten: '', Phong_ban: 'Phòng Kỹ Thuật', Chuc_vu: 'Nhân viên', Luong_co_ban: 10000000, Mat_khau: '123456' }); setIsModalOpen(true); }}
                     className="bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg transition-transform active:scale-95">
                     <Plus className="w-5 h-5" /> <span>Thêm Mới</span>
                   </button>
@@ -379,19 +416,23 @@ export default function App() {
           </div>
         )}
 
+        {/* MODAL THÊM / SỬA NHÂN VIÊN */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 w-[500px] border border-slate-200">
+            <div className="bg-white rounded-3xl shadow-2xl p-8 w-[550px] border border-slate-200">
               <h3 className="text-2xl font-black text-slate-800 mb-6">{editingEmployee ? 'Chỉnh sửa Hồ sơ' : 'Thêm Nhân viên Mới'}</h3>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Mã Nhân Viên</label>
-                  <input type="text" value={formData.Ma_nhan_vien} onChange={e => setFormData({ ...formData, Ma_nhan_vien: e.target.value })} disabled={!!editingEmployee} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 font-semibold" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Mã Nhân Viên</label>
+                    <input type="text" value={formData.Ma_nhan_vien} onChange={e => setFormData({ ...formData, Ma_nhan_vien: e.target.value })} disabled={!!editingEmployee} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 font-semibold" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Họ và Tên</label>
+                    <input type="text" value={formData.Ho_ten} onChange={e => setFormData({ ...formData, Ho_ten: e.target.value })} className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-semibold" />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Họ và Tên</label>
-                  <input type="text" value={formData.Ho_ten} onChange={e => setFormData({ ...formData, Ho_ten: e.target.value })} className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-semibold" />
-                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Phòng Ban</label>
@@ -400,10 +441,23 @@ export default function App() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Lương Cơ Bản</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Lương Cơ Bản (VNĐ)</label>
                     <input type="number" value={formData.Luong_co_ban} onChange={e => setFormData({ ...formData, Luong_co_ban: Number(e.target.value) })} className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-blue-600" />
                   </div>
                 </div>
+
+                {/* TRƯỜNG NHẬP CHỨC VỤ VÀ MẬT KHẨU */}
+                <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Chức Vụ</label>
+                    <input type="text" value={formData.Chuc_vu} onChange={e => setFormData({ ...formData, Chuc_vu: e.target.value })} className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700" placeholder="VD: Lập trình viên" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2 text-red-500">Mật Khẩu Đăng Nhập</label>
+                    <input type="text" value={formData.Mat_khau} onChange={e => setFormData({ ...formData, Mat_khau: e.target.value })} className="w-full p-3 bg-white border border-red-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500 font-bold text-red-600" placeholder="Mật khẩu cấp cho NV" />
+                  </div>
+                </div>
+
               </div>
               <div className="flex justify-end gap-3 mt-8">
                 <button onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-colors">Hủy</button>
