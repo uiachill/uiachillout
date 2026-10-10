@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   LayoutDashboard, Users, DollarSign, Database, Printer, Search, Plus,
-  Trash2, Edit, Calculator, LogOut, Clock, FileText, Award, Download, FileDown, ChevronLeft, ChevronRight, Lock
+  Trash2, Edit, Calculator, LogOut, Clock, FileText, Award, Download, FileDown, ChevronLeft, ChevronRight, Lock, Menu, X
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import * as XLSX from 'xlsx';
@@ -19,6 +19,9 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  // --- STATE CHO GIAO DIỆN ĐIỆN THOẠI ---
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   // --- STATE CHO ĐĂNG NHẬP ---
   const [loginId, setLoginId] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -26,7 +29,6 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
 
-  // Đã thêm Chuc_vu và Mat_khau vào formData mặc định
   const [formData, setFormData] = useState({
     Ma_nhan_vien: '', Ho_ten: '', Phong_ban: 'Phòng Kỹ Thuật',
     Chuc_vu: 'Nhân viên', Luong_co_ban: 10000000, Mat_khau: '123456'
@@ -36,7 +38,6 @@ export default function App() {
     { id: 'PB01', name: 'Phòng Kỹ Thuật' }, { id: 'PB02', name: 'Phòng Kinh Doanh' }, { id: 'PB03', name: 'Phòng Nhân Sự' }
   ]);
 
-  // Đã thêm mật khẩu mặc định (123456) cho toàn bộ nhân viên cũ
   const [nhanVien, setNhanVien] = useState(() => JSON.parse(localStorage.getItem('nhanVien')) || [
     { Ma_nhan_vien: 'NV01', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV02', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 12000000, Chuc_vu: 'Tester', Mat_khau: '123456' },
@@ -69,15 +70,12 @@ export default function App() {
     localStorage.setItem('bangLuong', JSON.stringify(bangLuong));
   }, [nhanVien, chamCong, hoaDon, bangLuong]);
 
-  // --- HÀM XỬ LÝ ĐĂNG NHẬP ---
   const handleLogin = (e) => {
     e.preventDefault();
-    // 1. Kiểm tra tài khoản Admin mặc định
     if (loginId === 'ADMIN' && loginPassword === 'admin') {
       setCurrentUser({ id: 'ADMIN', name: 'Giám Đốc CSDL', role: 'admin' });
       return;
     }
-    // 2. Kiểm tra tài khoản Nhân viên trong CSDL
     const user = nhanVien.find(nv => nv.Ma_nhan_vien === loginId && nv.Mat_khau === loginPassword);
     if (user) {
       setCurrentUser({ id: user.Ma_nhan_vien, name: user.Ho_ten, role: 'user' });
@@ -90,34 +88,22 @@ export default function App() {
     const ketQua = nhanVien.map(nv => {
       const cc = chamCong.find(c => c.Ma_nhan_vien === nv.Ma_nhan_vien) || { So_ngay_cong: NGUYEN_TAC_NGAY_CONG, Gio_tang_ca: 0 };
       const luongThucTe = (nv.Luong_co_ban / NGUYEN_TAC_NGAY_CONG) * cc.So_ngay_cong;
-
       const luongGio = nv.Luong_co_ban / NGUYEN_TAC_NGAY_CONG / 8;
       const tienTangCa = cc.Gio_tang_ca * luongGio * 1.5;
-
       const tongPhuCap = phuCap.reduce((sum, pc) => sum + pc.So_tien, 0);
-
       const hdNhanVien = hoaDon.filter(h => h.Ma_nhan_vien === nv.Ma_nhan_vien);
       const doanhThu = hdNhanVien.reduce((sum, h) => sum + h.Gia_tri, 0);
       const hoaHong = nv.Phong_ban === 'Phòng Kinh Doanh' ? doanhThu * 0.05 : 0;
-
       const tongThuNhap = luongThucTe + tienTangCa + tongPhuCap + hoaHong;
       const baoHiem = nv.Luong_co_ban * 0.105;
       const thuNhapChiuThue = tongThuNhap - baoHiem;
       const thueTNCN = thuNhapChiuThue > 11000000 ? (thuNhapChiuThue - 11000000) * 0.05 : 0;
-
       const thucLanh = tongThuNhap - baoHiem - thueTNCN;
 
       return {
-        Ma_nhan_vien: nv.Ma_nhan_vien,
-        Ho_ten: nv.Ho_ten,
-        Phong_ban: nv.Phong_ban,
-        Luong_Thuc_Te: luongThucTe,
-        Tien_Tang_Ca: tienTangCa,
-        Phu_Cap: tongPhuCap,
-        Hoa_Hong: hoaHong,
-        Khau_Tru: baoHiem + thueTNCN,
-        Tong_Thu_Nhap: tongThuNhap,
-        Thuc_Lanh: thucLanh
+        Ma_nhan_vien: nv.Ma_nhan_vien, Ho_ten: nv.Ho_ten, Phong_ban: nv.Phong_ban,
+        Luong_Thuc_Te: luongThucTe, Tien_Tang_Ca: tienTangCa, Phu_Cap: tongPhuCap,
+        Hoa_Hong: hoaHong, Khau_Tru: baoHiem + thueTNCN, Tong_Thu_Nhap: tongThuNhap, Thuc_Lanh: thucLanh
       };
     });
     setBangLuong(ketQua);
@@ -203,13 +189,13 @@ export default function App() {
     : nhanVien.reduce((s, nv) => s + nv.Luong_co_ban, 0);
   const tongDoanhThu = hoaDon.reduce((s, h) => s + h.Gia_tri, 0);
 
-  // --- MÀN HÌNH ĐĂNG NHẬP MỚI ---
+
   if (!currentUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-blue-900 to-slate-900">
-        <div className="bg-white p-10 rounded-3xl shadow-2xl w-[450px] border border-white/20 backdrop-blur-sm">
+      <div className="min-h-screen flex items-center justify-center bg-slate-900 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-blue-900 to-slate-900 px-4">
+        <div className="bg-white p-8 md:p-10 rounded-3xl shadow-2xl w-full max-w-[450px] border border-white/20 backdrop-blur-sm">
           <div className="flex justify-center mb-6"><div className="p-4 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/50"><Lock className="w-10 h-10 text-white" /></div></div>
-          <h1 className="text-3xl font-black text-center text-slate-800 mb-2">CSDL lớp 11A4</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-center text-slate-800 mb-2">CSDL lớp 11A4</h1>
           <p className="text-center text-slate-500 mb-8 font-medium">Hệ thống Quản lý & Xác thực</p>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -239,14 +225,26 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden selection:bg-blue-200">
-      <aside className="w-[280px] bg-[#0B1121] flex flex-col h-screen shadow-2xl shadow-blue-900/20 z-20 relative shrink-0">
+
+      {/* Lớp nền tối mờ khi mở Menu trên Điện thoại */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 z-30 md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
+      )}
+
+      {/* THANH MENU (Sidebar) - Đã cấu hình Responsive trượt ngang */}
+      <aside className={`fixed md:relative top-0 left-0 h-screen w-[280px] bg-[#0B1121] flex flex-col shadow-2xl shadow-blue-900/20 z-40 shrink-0 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
-        <div className="p-7 flex items-center gap-4 border-b border-white/5">
-          <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl shadow-lg shadow-blue-500/30"><Calculator className="w-6 h-6 text-white" /></div>
-          <div>
-            <h1 className="text-white font-black text-xl tracking-tight">SmartPayroll</h1>
-            <span className="text-blue-400 text-xs font-bold uppercase tracking-wider">{currentUser.role === 'admin' ? 'Admin Portal' : 'User Portal'}</span>
+        <div className="p-7 flex items-center justify-between border-b border-white/5">
+          <div className="flex items-center gap-4">
+            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl shadow-lg shadow-blue-500/30"><Calculator className="w-6 h-6 text-white" /></div>
+            <div>
+              <h1 className="text-white font-black text-xl tracking-tight">SmartPayroll</h1>
+              <span className="text-blue-400 text-xs font-bold uppercase tracking-wider">{currentUser.role === 'admin' ? 'Admin Portal' : 'User Portal'}</span>
+            </div>
           </div>
+          <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-slate-400 hover:text-white p-1">
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
@@ -258,7 +256,7 @@ export default function App() {
             { id: 'thu-nhap', label: 'Hóa Đơn & Phụ Cấp', icon: FileText, auth: 'admin' },
             { id: 'luong', label: 'Kết Xuất Bảng Lương', icon: DollarSign, auth: 'all' },
           ].filter(item => item.auth === 'all' || currentUser.role === 'admin').map((item) => (
-            <button key={item.id} onClick={() => { setActiveTab(item.id); setCurrentPage(1); }}
+            <button key={item.id} onClick={() => { setActiveTab(item.id); setCurrentPage(1); setIsMobileMenuOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 group ${activeTab === item.id ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-xl shadow-blue-900/30 translate-x-1' : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}>
               <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-white' : 'group-hover:text-blue-400 transition-colors'}`} />
@@ -280,25 +278,37 @@ export default function App() {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10 bg-slate-50/50">
+      {/* KHU VỰC NỘI DUNG CHÍNH */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10 bg-slate-50/50 w-full">
+
+        {/* HEADER ĐIỆN THOẠI (Chỉ hiện trên màn hình nhỏ) */}
+        <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-200 shadow-sm z-20 sticky top-0">
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-xl"><Calculator className="w-5 h-5 text-white" /></div>
+            <h1 className="font-black text-xl text-slate-800">SmartPayroll</h1>
+          </div>
+          <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 bg-slate-100 rounded-xl text-slate-600 hover:bg-slate-200 transition-colors">
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
 
         {activeTab === 'dashboard' && (
-          <div className="p-8 lg:p-10 max-w-7xl mx-auto w-full h-full overflow-y-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h2 className="text-3xl font-black text-slate-800 mb-8 tracking-tight">Tổng Quan Hệ Thống</h2>
+          <div className="p-4 md:p-8 lg:p-10 max-w-7xl mx-auto w-full h-full overflow-y-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6 md:mb-8 tracking-tight">Tổng Quan Hệ Thống</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
               {[
                 { t: 'Tổng Nhân Sự', v: nhanVien.length, i: Users, c: 'blue' },
                 { t: 'Quỹ Lương (Dự kiến)', v: `${Math.round(quyLuongDuToan).toLocaleString()} đ`, i: DollarSign, c: 'emerald' },
                 { t: 'Tổng Doanh Thu', v: `${Math.round(tongDoanhThu).toLocaleString()} đ`, i: Database, c: 'purple' },
                 { t: 'Phòng Ban', v: phongBan.length, i: LayoutDashboard, c: 'orange' }
               ].map((kpi, idx) => (
-                <div key={idx} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <div key={idx} className="bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                   <div className="flex items-center gap-4">
-                    <div className={`p-4 rounded-2xl bg-${kpi.c}-50 text-${kpi.c}-600 ring-1 ring-${kpi.c}-100 shrink-0`}><kpi.i className="w-7 h-7" /></div>
+                    <div className={`p-3 md:p-4 rounded-2xl bg-${kpi.c}-50 text-${kpi.c}-600 ring-1 ring-${kpi.c}-100 shrink-0`}><kpi.i className="w-6 h-6 md:w-7 md:h-7" /></div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-slate-500 mb-1 truncate">{kpi.t}</p>
-                      <p className="text-xl lg:text-2xl font-black text-slate-800 truncate" title={kpi.v}>{kpi.v}</p>
+                      <p className="text-xs md:text-sm font-semibold text-slate-500 mb-1 truncate">{kpi.t}</p>
+                      <p className="text-lg md:text-xl lg:text-2xl font-black text-slate-800 truncate" title={kpi.v}>{kpi.v}</p>
                     </div>
                   </div>
                 </div>
@@ -306,29 +316,29 @@ export default function App() {
             </div>
 
             {currentUser.role === 'admin' ? (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[450px]">
-                <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col">
-                  <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2"><BarChart className="w-5 h-5 text-blue-500" /> Phân tích Quỹ lương</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-[450px]">
+                <div className="lg:col-span-2 bg-white p-4 md:p-6 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col h-[350px] lg:h-auto">
+                  <h3 className="text-lg font-bold text-slate-800 mb-4 md:mb-6 flex items-center gap-2"><BarChart className="w-5 h-5 text-blue-500" /> Phân tích Quỹ lương</h3>
                   <div className="flex-1 min-h-0">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={bangLuong.length ? bangLuong : nhanVien.map(n => ({ Ho_ten: n.Ho_ten, Thuc_Lanh: n.Luong_co_ban, Tong_Thu_Nhap: n.Luong_co_ban * 1.1 }))} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                        <XAxis dataKey="Ho_ten" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12, fontWeight: 600 }} dy={10} />
-                        <YAxis tickFormatter={v => `${v / 1000000}Tr`} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                        <XAxis dataKey="Ho_ten" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 10, fontWeight: 600 }} dy={10} />
+                        <YAxis tickFormatter={v => `${v / 1000000}Tr`} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 10 }} />
                         <Tooltip formatter={v => v.toLocaleString() + ' đ'} cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
                         <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                        <Bar dataKey="Thuc_Lanh" name="Thực Lãnh" fill="#10B981" radius={[6, 6, 0, 0]} maxBarSize={50} />
-                        <Bar dataKey="Tong_Thu_Nhap" name="Tổng Chi Phí" fill="#3B82F6" radius={[6, 6, 0, 0]} maxBarSize={50} />
+                        <Bar dataKey="Thuc_Lanh" name="Thực Lãnh" fill="#10B981" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                        <Bar dataKey="Tong_Thu_Nhap" name="Tổng Chi Phí" fill="#3B82F6" radius={[4, 4, 0, 0]} maxBarSize={40} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col">
-                  <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2"><PieChart className="w-5 h-5 text-purple-500" /> Phân bổ Nhân sự</h3>
+                <div className="bg-white p-4 md:p-6 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col h-[350px] lg:h-auto">
+                  <h3 className="text-lg font-bold text-slate-800 mb-4 md:mb-6 flex items-center gap-2"><PieChart className="w-5 h-5 text-purple-500" /> Phân bổ Nhân sự</h3>
                   <div className="flex-1 min-h-0">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={phongBan.map(pb => ({ name: pb.name, value: nhanVien.filter(nv => nv.Phong_ban === pb.name).length }))} cx="50%" cy="50%" innerRadius={70} outerRadius={110} paddingAngle={5} dataKey="value">
+                        <Pie data={phongBan.map(pb => ({ name: pb.name, value: nhanVien.filter(nv => nv.Phong_ban === pb.name).length }))} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
                           {phongBan.map((e, i) => <Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />)}
                         </Pie>
                         <Tooltip />
@@ -339,32 +349,32 @@ export default function App() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white p-12 rounded-3xl text-center shadow-sm border border-slate-200">
-                <Lock className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-slate-700">Dữ liệu phân tích giới hạn</h3>
-                <p className="text-slate-500 mt-2">Chỉ cấp Quản lý (Admin) mới có quyền truy cập báo cáo tổng thể doanh nghiệp.</p>
+              <div className="bg-white p-8 md:p-12 rounded-3xl text-center shadow-sm border border-slate-200">
+                <Lock className="w-12 h-12 md:w-16 md:h-16 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-lg md:text-xl font-bold text-slate-700">Dữ liệu phân tích giới hạn</h3>
+                <p className="text-sm md:text-base text-slate-500 mt-2">Chỉ cấp Quản lý (Admin) mới có quyền truy cập báo cáo tổng thể doanh nghiệp.</p>
               </div>
             )}
           </div>
         )}
 
         {activeTab === 'nhan-vien' && (
-          <div className="p-8 lg:p-10 flex flex-col h-full max-w-[1400px] mx-auto w-full animate-in fade-in">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 shrink-0">
-              <h2 className="text-3xl font-black text-slate-800 tracking-tight">Hồ Sơ Nhân Sự</h2>
-              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                <div className="relative flex-1 md:w-64">
+          <div className="p-4 md:p-8 lg:p-10 flex flex-col h-full max-w-[1400px] mx-auto w-full animate-in fade-in">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8 shrink-0">
+              <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Hồ Sơ Nhân Sự</h2>
+              <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full md:w-auto">
+                <div className="relative flex-1 sm:w-64">
                   <Search className="w-5 h-5 absolute left-4 top-3 text-slate-400" />
                   <input type="text" placeholder="Tìm mã hoặc tên..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                     className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-shadow" />
                 </div>
-                <select value={filterDept} onChange={(e) => { setFilterDept(e.target.value); setCurrentPage(1); }} className="py-2.5 px-4 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700 shadow-sm cursor-pointer">
+                <select value={filterDept} onChange={(e) => { setFilterDept(e.target.value); setCurrentPage(1); }} className="w-full sm:w-auto py-2.5 px-4 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700 shadow-sm cursor-pointer">
                   <option value="All">Tất cả phòng ban</option>
                   {phongBan.map(pb => <option key={pb.id} value={pb.name}>{pb.name}</option>)}
                 </select>
                 {currentUser.role === 'admin' && (
                   <button onClick={() => { setEditingEmployee(null); setFormData({ Ma_nhan_vien: '', Ho_ten: '', Phong_ban: 'Phòng Kỹ Thuật', Chuc_vu: 'Nhân viên', Luong_co_ban: 10000000, Mat_khau: '123456' }); setIsModalOpen(true); }}
-                    className="bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg transition-transform active:scale-95">
+                    className="w-full sm:w-auto justify-center bg-slate-800 hover:bg-slate-900 text-white px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg transition-transform active:scale-95">
                     <Plus className="w-5 h-5" /> <span>Thêm Mới</span>
                   </button>
                 )}
@@ -372,28 +382,28 @@ export default function App() {
             </div>
 
             <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-0">
-              <div className="overflow-auto flex-1">
-                <table className="w-full text-left border-collapse">
+              <div className="overflow-x-auto overflow-y-auto flex-1">
+                <table className="w-full text-left border-collapse whitespace-nowrap min-w-[700px]">
                   <thead className="bg-slate-50/90 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-200 shadow-sm">
                     <tr>
                       {['Mã NV', 'Họ và Tên', 'Phòng Ban', 'Chức Vụ', 'Lương Cơ Bản', 'Thao Tác'].map((h, i) => (
-                        <th key={i} className="p-5 text-xs font-black text-slate-500 uppercase tracking-widest">{h}</th>
+                        <th key={i} className="p-4 md:p-5 text-xs font-black text-slate-500 uppercase tracking-widest">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {paginatedEmployees.map((nv) => (
                       <tr key={nv.Ma_nhan_vien} className="hover:bg-blue-50/40 transition-colors group">
-                        <td className="p-5 font-bold text-blue-600">{nv.Ma_nhan_vien}</td>
-                        <td className="p-5 text-slate-800 font-bold text-base">{nv.Ho_ten}</td>
-                        <td className="p-5"><span className="bg-slate-100 text-slate-600 font-bold px-3 py-1.5 rounded-lg text-xs border border-slate-200">{nv.Phong_ban}</span></td>
-                        <td className="p-5 text-slate-600 font-medium">{nv.Chuc_vu || 'Nhân viên'}</td>
-                        <td className="p-5 text-slate-800 font-bold">{nv.Luong_co_ban.toLocaleString()} đ</td>
-                        <td className="p-5">
+                        <td className="p-4 md:p-5 font-bold text-blue-600">{nv.Ma_nhan_vien}</td>
+                        <td className="p-4 md:p-5 text-slate-800 font-bold text-base">{nv.Ho_ten}</td>
+                        <td className="p-4 md:p-5"><span className="bg-slate-100 text-slate-600 font-bold px-3 py-1.5 rounded-lg text-xs border border-slate-200">{nv.Phong_ban}</span></td>
+                        <td className="p-4 md:p-5 text-slate-600 font-medium">{nv.Chuc_vu || 'Nhân viên'}</td>
+                        <td className="p-4 md:p-5 text-slate-800 font-bold">{nv.Luong_co_ban.toLocaleString()} đ</td>
+                        <td className="p-4 md:p-5">
                           {currentUser.role === 'admin' ? (
-                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => { setEditingEmployee(nv); setFormData(nv); setIsModalOpen(true); }} className="p-2 text-blue-500 hover:bg-blue-100 rounded-xl transition-colors"><Edit className="w-4 h-4" /></button>
-                              <button onClick={() => handleDeleteEmployee(nv.Ma_nhan_vien)} className="p-2 text-red-500 hover:bg-red-100 rounded-xl transition-colors"><Trash2 className="w-4 h-4" /></button>
+                            <div className="flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => { setEditingEmployee(nv); setFormData(nv); setIsModalOpen(true); }} className="p-2 bg-blue-50 md:bg-transparent text-blue-500 hover:bg-blue-100 rounded-xl transition-colors"><Edit className="w-4 h-4" /></button>
+                              <button onClick={() => handleDeleteEmployee(nv.Ma_nhan_vien)} className="p-2 bg-red-50 md:bg-transparent text-red-500 hover:bg-red-100 rounded-xl transition-colors"><Trash2 className="w-4 h-4" /></button>
                             </div>
                           ) : <Lock className="w-4 h-4 text-slate-300" />}
                         </td>
@@ -406,8 +416,8 @@ export default function App() {
                 </table>
               </div>
 
-              <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center shrink-0">
-                <span className="text-sm text-slate-500 font-medium">Hiển thị {paginatedEmployees.length} / {filteredEmployees.length} kết quả</span>
+              <div className="p-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
+                <span className="text-sm text-slate-500 font-medium text-center sm:text-left">Hiển thị {paginatedEmployees.length} / {filteredEmployees.length} kết quả</span>
                 <div className="flex gap-2">
                   <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 bg-white border border-slate-200 rounded-xl disabled:opacity-50 hover:bg-slate-100"><ChevronLeft className="w-5 h-5 text-slate-600" /></button>
                   <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0} className="p-2 bg-white border border-slate-200 rounded-xl disabled:opacity-50 hover:bg-slate-100"><ChevronRight className="w-5 h-5 text-slate-600" /></button>
@@ -419,11 +429,11 @@ export default function App() {
 
         {/* MODAL THÊM / SỬA NHÂN VIÊN */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 w-[550px] border border-slate-200">
-              <h3 className="text-2xl font-black text-slate-800 mb-6">{editingEmployee ? 'Chỉnh sửa Hồ sơ' : 'Thêm Nhân viên Mới'}</h3>
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in">
+            <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-[550px] max-h-[90vh] overflow-y-auto border border-slate-200">
+              <h3 className="text-xl md:text-2xl font-black text-slate-800 mb-6">{editingEmployee ? 'Chỉnh sửa Hồ sơ' : 'Thêm Nhân viên Mới'}</h3>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Mã Nhân Viên</label>
                     <input type="text" value={formData.Ma_nhan_vien} onChange={e => setFormData({ ...formData, Ma_nhan_vien: e.target.value })} disabled={!!editingEmployee} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 font-semibold" />
@@ -434,7 +444,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Phòng Ban</label>
                     <select value={formData.Phong_ban} onChange={e => setFormData({ ...formData, Phong_ban: e.target.value })} className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-semibold">
@@ -447,50 +457,49 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* TRƯỜNG NHẬP CHỨC VỤ VÀ MẬT KHẨU */}
-                <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Chức Vụ</label>
                     <input type="text" value={formData.Chuc_vu} onChange={e => setFormData({ ...formData, Chuc_vu: e.target.value })} className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700" placeholder="VD: Lập trình viên" />
                   </div>
                   <div>
-                    <label className=" block text-xs font-bold text-slate-500 uppercase mb-2 text-red-500">Mật Khẩu Đăng Nhập</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2 text-red-500">Mật Khẩu Đăng Nhập</label>
                     <input type="text" value={formData.Mat_khau} onChange={e => setFormData({ ...formData, Mat_khau: e.target.value })} className="w-full p-3 bg-white border border-red-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500 font-bold text-red-600" placeholder="Mật khẩu cấp cho NV" />
                   </div>
                 </div>
 
               </div>
-              <div className="flex justify-end gap-3 mt-8">
-                <button onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-colors">Hủy</button>
-                <button onClick={handleSaveEmployee} className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-500/30 transition-all active:scale-95">Lưu Dữ Liệu</button>
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-8">
+                <button onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-colors">Hủy</button>
+                <button onClick={handleSaveEmployee} className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-500/30 transition-all active:scale-95">Lưu Dữ Liệu</button>
               </div>
             </div>
           </div>
         )}
 
         {activeTab === 'cham-cong' && currentUser.role === 'admin' && (
-          <div className="p-8 lg:p-10 flex flex-col h-full max-w-[1400px] mx-auto w-full animate-in fade-in">
-            <div className="flex justify-between items-center mb-8 shrink-0">
-              <h2 className="text-3xl font-black text-slate-800 tracking-tight">Quản Lý Chấm Công</h2>
-              <div className="bg-amber-100 text-amber-700 px-4 py-2 rounded-xl font-bold flex items-center gap-2"><Clock className="w-5 h-5" /> Tháng hiện tại: {NGUYEN_TAC_NGAY_CONG} ngày chuẩn</div>
+          <div className="p-4 md:p-8 lg:p-10 flex flex-col h-full max-w-[1400px] mx-auto w-full animate-in fade-in">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8 shrink-0">
+              <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Quản Lý Chấm Công</h2>
+              <div className="w-full sm:w-auto justify-center bg-amber-100 text-amber-700 px-4 py-2 rounded-xl font-bold flex items-center gap-2"><Clock className="w-5 h-5" /> Tháng hiện tại: {NGUYEN_TAC_NGAY_CONG} ngày chuẩn</div>
             </div>
             <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-0">
-              <div className="overflow-y-auto flex-1">
-                <table className="w-full text-left relative">
+              <div className="overflow-x-auto overflow-y-auto flex-1">
+                <table className="w-full text-left relative whitespace-nowrap min-w-[500px]">
                   <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10 shadow-sm">
-                    <tr><th className="p-5 font-black text-slate-500 uppercase tracking-widest">Mã NV</th><th className="p-5 font-black text-slate-500 uppercase tracking-widest">Ngày đi làm thực tế</th><th className="p-5 font-black text-slate-500 uppercase tracking-widest">Giờ Tăng Ca</th></tr>
+                    <tr><th className="p-4 md:p-5 font-black text-slate-500 uppercase tracking-widest">Mã NV</th><th className="p-4 md:p-5 font-black text-slate-500 uppercase tracking-widest">Ngày đi làm thực tế</th><th className="p-4 md:p-5 font-black text-slate-500 uppercase tracking-widest">Giờ Tăng Ca</th></tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {chamCong.map((cc) => (
                       <tr key={cc.Ma_nhan_vien} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="p-5 font-bold text-slate-700">{cc.Ma_nhan_vien}</td>
-                        <td className="p-5">
+                        <td className="p-4 md:p-5 font-bold text-slate-700">{cc.Ma_nhan_vien}</td>
+                        <td className="p-4 md:p-5">
                           <input type="number" min="0" max="31" value={cc.So_ngay_cong} onChange={(e) => updateChamCong(cc.Ma_nhan_vien, 'So_ngay_cong', e.target.value)}
-                            className="w-24 p-2 bg-white border border-slate-300 rounded-lg text-center font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 outline-none" /> / {NGUYEN_TAC_NGAY_CONG}
+                            className="w-20 md:w-24 p-2 bg-white border border-slate-300 rounded-lg text-center font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 outline-none" /> / {NGUYEN_TAC_NGAY_CONG}
                         </td>
-                        <td className="p-5">
+                        <td className="p-4 md:p-5">
                           <input type="number" min="0" value={cc.Gio_tang_ca} onChange={(e) => updateChamCong(cc.Ma_nhan_vien, 'Gio_tang_ca', e.target.value)}
-                            className="w-24 p-2 bg-white border border-slate-300 rounded-lg text-center font-bold text-amber-600 focus:ring-2 focus:ring-amber-500 outline-none" /> giờ
+                            className="w-20 md:w-24 p-2 bg-white border border-slate-300 rounded-lg text-center font-bold text-amber-600 focus:ring-2 focus:ring-amber-500 outline-none" /> giờ
                         </td>
                       </tr>
                     ))}
@@ -502,91 +511,93 @@ export default function App() {
         )}
 
         {activeTab === 'thu-nhap' && currentUser.role === 'admin' && (
-          <div className="p-8 lg:p-10 max-w-[1400px] mx-auto w-full h-full overflow-y-auto animate-in fade-in">
-            <div className="flex justify-between items-center mb-8 shrink-0">
-              <h2 className="text-3xl font-black text-slate-800 tracking-tight">Hóa Đơn & Phụ Cấp</h2>
-              <button onClick={handleAddHoaDon} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg transition-transform active:scale-95">
+          <div className="p-4 md:p-8 lg:p-10 max-w-[1400px] mx-auto w-full h-full overflow-y-auto animate-in fade-in">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8 shrink-0">
+              <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Hóa Đơn & Phụ Cấp</h2>
+              <button onClick={handleAddHoaDon} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg transition-transform active:scale-95">
                 <Plus className="w-5 h-5" /> <span>Thêm Hóa Đơn (Tăng Doanh Thu)</span>
               </button>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
-                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" /> Hóa Đơn Phát Sinh (Kinh Doanh)</h3>
-                <p className="text-sm text-slate-500 mb-4">Nhân viên lập hóa đơn sẽ được AI cộng 5% hoa hồng vào lương.</p>
-                <div className="overflow-y-auto max-h-[400px]">
-                  <table className="w-full text-left bg-slate-50 rounded-xl overflow-hidden relative">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6">
+                <h3 className="text-base md:text-lg font-bold text-slate-800 mb-2 md:mb-4 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" /> Hóa Đơn Phát Sinh (Kinh Doanh)</h3>
+                <p className="text-xs md:text-sm text-slate-500 mb-4">Nhân viên lập hóa đơn sẽ được AI cộng 5% hoa hồng vào lương.</p>
+                <div className="overflow-y-auto overflow-x-auto max-h-[400px]">
+                  <table className="w-full text-left bg-slate-50 rounded-xl overflow-hidden relative whitespace-nowrap min-w-[400px]">
                     <thead className="bg-slate-100 sticky top-0"><tr><th className="p-3 text-xs font-bold text-slate-600 uppercase">Mã HD</th><th className="p-3 text-xs font-bold text-slate-600 uppercase">Mã NV</th><th className="p-3 text-xs font-bold text-slate-600 uppercase">Giá Trị (VNĐ)</th><th className="p-3 text-center">Thao tác</th></tr></thead>
                     <tbody className="divide-y divide-slate-200">{hoaDon.map(hd => <tr key={hd.Ma_HD} className="hover:bg-white group"><td className="p-3 font-semibold">{hd.Ma_HD}</td><td className="p-3 text-blue-600 font-bold">{hd.Ma_nhan_vien}</td><td className="p-3 text-emerald-600 font-bold">{hd.Gia_tri.toLocaleString()} đ</td>
-                      <td className="p-3 text-center"><button onClick={() => handleDeleteHoaDon(hd.Ma_HD)} className="text-red-400 hover:text-red-600 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-4 h-4" /></button></td>
+                      <td className="p-3 text-center"><button onClick={() => handleDeleteHoaDon(hd.Ma_HD)} className="text-red-400 hover:text-red-600 p-1 rounded-lg opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity bg-red-50 md:bg-transparent"><Trash2 className="w-4 h-4" /></button></td>
                     </tr>)}
                       {hoaDon.length === 0 && (<tr><td colSpan="4" className="p-6 text-center text-slate-400">Chưa có hóa đơn nào</td></tr>)}
                     </tbody>
                   </table>
                 </div>
               </div>
-              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
-                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><Award className="w-5 h-5 text-purple-500" /> Phụ Cấp Cố Định (Toàn công ty)</h3>
-                <table className="w-full text-left bg-slate-50 rounded-xl overflow-hidden">
-                  <thead className="bg-slate-100"><tr><th className="p-3 text-xs font-bold text-slate-600 uppercase">Loại Phụ Cấp</th><th className="p-3 text-xs font-bold text-slate-600 uppercase">Số Tiền (VNĐ)</th></tr></thead>
-                  <tbody className="divide-y divide-slate-200">{phuCap.map((pc, i) => <tr key={i}><td className="p-3 font-semibold">{pc.Loai}</td><td className="p-3 text-emerald-600 font-bold">+{pc.So_tien.toLocaleString()} đ</td></tr>)}</tbody>
-                </table>
+              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6">
+                <h3 className="text-base md:text-lg font-bold text-slate-800 mb-2 md:mb-4 flex items-center gap-2"><Award className="w-5 h-5 text-purple-500" /> Phụ Cấp Cố Định (Toàn công ty)</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left bg-slate-50 rounded-xl overflow-hidden whitespace-nowrap min-w-[300px]">
+                    <thead className="bg-slate-100"><tr><th className="p-3 text-xs font-bold text-slate-600 uppercase">Loại Phụ Cấp</th><th className="p-3 text-xs font-bold text-slate-600 uppercase">Số Tiền (VNĐ)</th></tr></thead>
+                    <tbody className="divide-y divide-slate-200">{phuCap.map((pc, i) => <tr key={i}><td className="p-3 font-semibold">{pc.Loai}</td><td className="p-3 text-emerald-600 font-bold">+{pc.So_tien.toLocaleString()} đ</td></tr>)}</tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {activeTab === 'luong' && (
-          <div className="p-8 lg:p-10 flex flex-col h-full max-w-[1400px] mx-auto w-full animate-in fade-in">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white p-5 rounded-3xl shadow-sm border border-slate-200 shrink-0">
+          <div className="p-4 md:p-8 lg:p-10 flex flex-col h-full max-w-[1400px] mx-auto w-full animate-in fade-in">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 md:mb-8 bg-white p-4 md:p-5 rounded-3xl shadow-sm border border-slate-200 shrink-0">
               <div>
-                <h2 className="text-2xl font-black text-slate-800">Kết Xuất Bảng Lương</h2>
-                <p className="text-sm text-slate-500 font-medium mt-1">Dựa trên logic: Lương ngày + Tăng ca + Phụ cấp + Hoa hồng - Bảo hiểm - Thuế</p>
+                <h2 className="text-xl md:text-2xl font-black text-slate-800">Kết Xuất Bảng Lương</h2>
+                <p className="text-xs md:text-sm text-slate-500 font-medium mt-1">Dựa trên logic: Lương ngày + Tăng ca + Phụ cấp + Hoa hồng - Bảo hiểm - Thuế</p>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full lg:w-auto">
                 {currentUser.role === 'admin' && (
-                  <button onClick={handleTinhLuong} className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95">
-                    <Calculator className="w-5 h-5" /> <span>Chạy AI Tính Lương</span>
+                  <button onClick={handleTinhLuong} className="flex-1 lg:flex-none justify-center bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 md:px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 text-sm md:text-base">
+                    <Calculator className="w-4 h-4 md:w-5 md:h-5" /> <span>Chạy AI Tính Lương</span>
                   </button>
                 )}
-                <button onClick={exportToExcel} disabled={bangLuong.length === 0} className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors disabled:opacity-50">
-                  <FileDown className="w-5 h-5" /> Excel
+                <button onClick={exportToExcel} disabled={bangLuong.length === 0} className="flex-1 lg:flex-none justify-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 md:px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors disabled:opacity-50 text-sm md:text-base">
+                  <FileDown className="w-4 h-4 md:w-5 md:h-5" /> Excel
                 </button>
-                <button onClick={exportToPDF} disabled={bangLuong.length === 0} className="bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors disabled:opacity-50">
-                  <Download className="w-5 h-5" /> PDF
+                <button onClick={exportToPDF} disabled={bangLuong.length === 0} className="flex-1 lg:flex-none justify-center bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 px-3 md:px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors disabled:opacity-50 text-sm md:text-base">
+                  <Download className="w-4 h-4 md:w-5 md:h-5" /> PDF
                 </button>
-                <button onClick={() => window.print()} className="bg-slate-800 text-white hover:bg-slate-900 px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors">
-                  <Printer className="w-5 h-5" /> In
+                <button onClick={() => window.print()} className="flex-1 lg:flex-none justify-center bg-slate-800 text-white hover:bg-slate-900 px-3 md:px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors text-sm md:text-base">
+                  <Printer className="w-4 h-4 md:w-5 md:h-5" /> In
                 </button>
               </div>
             </div>
 
             <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-0 print:shadow-none print:border-none print:overflow-visible">
-              <div className="overflow-auto flex-1">
-                <table className="w-full text-left border-collapse min-w-[1000px]">
+              <div className="overflow-x-auto overflow-y-auto flex-1">
+                <table className="w-full text-left border-collapse whitespace-nowrap min-w-[1000px]">
                   <thead className="bg-slate-50/90 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-200 shadow-sm print:bg-white print:relative">
                     <tr>
-                      <th className="p-5 text-xs font-black text-slate-500 uppercase">Mã NV</th>
-                      <th className="p-5 text-xs font-black text-slate-500 uppercase">Họ Tên</th>
-                      <th className="p-5 text-xs font-black text-slate-500 uppercase text-right">Lương Thực Tế</th>
-                      <th className="p-5 text-xs font-black text-slate-500 uppercase text-right">Tăng Ca</th>
-                      <th className="p-5 text-xs font-black text-slate-500 uppercase text-right">Thưởng/Phụ Cấp</th>
-                      <th className="p-5 text-xs font-black text-slate-500 uppercase text-right">Khấu Trừ (BH+Thuế)</th>
-                      <th className="p-5 text-sm font-black text-slate-800 uppercase text-right bg-emerald-50/50">Thực Lãnh</th>
+                      <th className="p-4 md:p-5 text-xs font-black text-slate-500 uppercase">Mã NV</th>
+                      <th className="p-4 md:p-5 text-xs font-black text-slate-500 uppercase">Họ Tên</th>
+                      <th className="p-4 md:p-5 text-xs font-black text-slate-500 uppercase text-right">Lương Thực Tế</th>
+                      <th className="p-4 md:p-5 text-xs font-black text-slate-500 uppercase text-right">Tăng Ca</th>
+                      <th className="p-4 md:p-5 text-xs font-black text-slate-500 uppercase text-right">Thưởng/Phụ Cấp</th>
+                      <th className="p-4 md:p-5 text-xs font-black text-slate-500 uppercase text-right">Khấu Trừ (BH+Thuế)</th>
+                      <th className="p-4 md:p-5 text-sm font-black text-slate-800 uppercase text-right bg-emerald-50/50">Thực Lãnh</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {bangLuong.length === 0 ? (
-                      <tr><td colSpan="7" className="p-16 text-center text-slate-400 font-medium text-lg">Chưa có dữ liệu bảng lương. Vui lòng chạy tính toán.</td></tr>
+                      <tr><td colSpan="7" className="p-10 md:p-16 text-center text-slate-400 font-medium text-base md:text-lg">Chưa có dữ liệu bảng lương. Vui lòng chạy tính toán.</td></tr>
                     ) : (
                       bangLuong.filter(bl => currentUser.role === 'admin' || bl.Ma_nhan_vien === currentUser.id).map((bl, i) => (
                         <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="p-5 font-bold text-blue-600">{bl.Ma_nhan_vien}</td>
-                          <td className="p-5 text-slate-800 font-bold">{bl.Ho_ten}</td>
-                          <td className="p-5 text-slate-600 font-medium text-right">{Math.round(bl.Luong_Thuc_Te).toLocaleString()} đ</td>
-                          <td className="p-5 text-amber-600 font-medium text-right">+{Math.round(bl.Tien_Tang_Ca).toLocaleString()} đ</td>
-                          <td className="p-5 text-purple-600 font-medium text-right">+{Math.round(bl.Phu_Cap + bl.Hoa_Hong).toLocaleString()} đ</td>
-                          <td className="p-5 text-red-500 font-medium text-right">-{Math.round(bl.Khau_Tru).toLocaleString()} đ</td>
-                          <td className="p-5 text-emerald-600 font-black text-lg text-right bg-emerald-50/30">{Math.round(bl.Thuc_Lanh).toLocaleString()} đ</td>
+                          <td className="p-4 md:p-5 font-bold text-blue-600">{bl.Ma_nhan_vien}</td>
+                          <td className="p-4 md:p-5 text-slate-800 font-bold">{bl.Ho_ten}</td>
+                          <td className="p-4 md:p-5 text-slate-600 font-medium text-right">{Math.round(bl.Luong_Thuc_Te).toLocaleString()} đ</td>
+                          <td className="p-4 md:p-5 text-amber-600 font-medium text-right">+{Math.round(bl.Tien_Tang_Ca).toLocaleString()} đ</td>
+                          <td className="p-4 md:p-5 text-purple-600 font-medium text-right">+{Math.round(bl.Phu_Cap + bl.Hoa_Hong).toLocaleString()} đ</td>
+                          <td className="p-4 md:p-5 text-red-500 font-medium text-right">-{Math.round(bl.Khau_Tru).toLocaleString()} đ</td>
+                          <td className="p-4 md:p-5 text-emerald-600 font-black text-base md:text-lg text-right bg-emerald-50/30">{Math.round(bl.Thuc_Lanh).toLocaleString()} đ</td>
                         </tr>
                       ))
                     )}
