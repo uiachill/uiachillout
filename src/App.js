@@ -215,8 +215,6 @@ export default function App() {
           </form>
 
           <div className="text-center text-xs text-slate-400 mt-8 pt-4 border-t border-slate-100">
-            <p className="mb-1">Tài khoản Quản lý: ID <b>ADMIN</b> | Pass: <b>admin</b></p>
-            <p>Tài khoản Nhân viên: ID <b>NV01</b> | Pass: <b>123456</b></p>
           </div>
         </div>
       </div>
