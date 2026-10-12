@@ -44,7 +44,6 @@ export default function App() {
     { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 18000000, Chuc_vu: 'Trưởng phòng', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'CODE', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV05', Ho_ten: 'Hoàng Yến Nhi', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV06', Ho_ten: 'Tú Thọ Điện', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'mr beast', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV07', Ho_ten: 'Ngô Thái Hòa', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 8000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
   ]);
 
