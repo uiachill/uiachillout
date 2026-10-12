@@ -189,7 +189,6 @@ export default function App() {
     : nhanVien.reduce((s, nv) => s + nv.Luong_co_ban, 0);
   const tongDoanhThu = hoaDon.reduce((s, h) => s + h.Gia_tri, 0);
 
-
   if (!currentUser) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-blue-900 to-slate-900 px-4">
@@ -213,9 +212,6 @@ export default function App() {
               <Lock className="w-5 h-5" /> Đăng Nhập
             </button>
           </form>
-
-          <div className="text-center text-xs text-slate-400 mt-8 pt-4 border-t border-slate-100">
-          </div>
         </div>
       </div>
     );
