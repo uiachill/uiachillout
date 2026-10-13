@@ -109,6 +109,13 @@ export default function App() {
     alert('Hệ thống AI đã tính toán xong lương tháng này!');
   };
 
+  // --- HÀM MỚI: XÓA KẾT XUẤT BẢNG LƯƠNG ---
+  const handleClearLuong = () => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu kết xuất bảng lương hiện tại?')) {
+      setBangLuong([]);
+    }
+  };
+
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(bangLuong.map(bl => ({
       "Mã NV": bl.Ma_nhan_vien, "Họ Tên": bl.Ho_ten, "Phòng Ban": bl.Phong_ban,
@@ -548,9 +555,15 @@ export default function App() {
               </div>
               <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full lg:w-auto">
                 {currentUser.role === 'admin' && (
-                  <button onClick={handleTinhLuong} className="flex-1 lg:flex-none justify-center bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 md:px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 text-sm md:text-base">
-                    <Calculator className="w-4 h-4 md:w-5 md:h-5" /> <span>Chạy AI Tính Lương</span>
-                  </button>
+                  <>
+                    <button onClick={handleTinhLuong} className="flex-1 lg:flex-none justify-center bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 md:px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 text-sm md:text-base">
+                      <Calculator className="w-4 h-4 md:w-5 md:h-5" /> <span>Chạy AI Tính Lương</span>
+                    </button>
+                    {/* Nút Xóa Dữ Liệu Lương */}
+                    <button onClick={handleClearLuong} disabled={bangLuong.length === 0} className="flex-1 lg:flex-none justify-center bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 px-3 md:px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors disabled:opacity-50 text-sm md:text-base">
+                      <Trash2 className="w-4 h-4 md:w-5 md:h-5" /> <span>Xóa Dữ Liệu</span>
+                    </button>
+                  </>
                 )}
                 <button onClick={exportToExcel} disabled={bangLuong.length === 0} className="flex-1 lg:flex-none justify-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 md:px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors disabled:opacity-50 text-sm md:text-base">
                   <FileDown className="w-4 h-4 md:w-5 md:h-5" /> Excel
