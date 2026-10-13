@@ -60,7 +60,7 @@ export default function App() {
     { Loai: 'Ăn trưa', So_tien: 1000000 }, { Loai: 'Xăng xe', So_tien: 500000 }
   ]);
 
-  const [bangLuong, setBangLuong] = useState(() => JSON.parse(localStorage.getItem('bangLuong')) || []);
+  const [bangLuong, setBangLuong] = useState([]);
 
   useEffect(() => {
     localStorage.setItem('nhanVien', JSON.stringify(nhanVien));
