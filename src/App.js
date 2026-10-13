@@ -19,10 +19,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // --- STATE CHO GIAO DIỆN ĐIỆN THOẠI ---
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // --- STATE CHO ĐĂNG NHẬP ---
   const [loginId, setLoginId] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
@@ -60,7 +57,7 @@ export default function App() {
     { Loai: 'Ăn trưa', So_tien: 1000000 }, { Loai: 'Xăng xe', So_tien: 500000 }
   ]);
 
-  const [bangLuong, setBangLuong] = useState([]);
+  const [bangLuong, setBangLuong] = useState(() => JSON.parse(localStorage.getItem('bangLuong')) || []);
 
   useEffect(() => {
     localStorage.setItem('nhanVien', JSON.stringify(nhanVien));
@@ -107,13 +104,6 @@ export default function App() {
     });
     setBangLuong(ketQua);
     alert('Hệ thống AI đã tính toán xong lương tháng này!');
-  };
-
-  // --- HÀM MỚI: XÓA KẾT XUẤT BẢNG LƯƠNG ---
-  const handleClearLuong = () => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu kết xuất bảng lương hiện tại?')) {
-      setBangLuong([]);
-    }
   };
 
   const exportToExcel = () => {
@@ -226,12 +216,10 @@ export default function App() {
   return (
     <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden selection:bg-blue-200">
 
-      {/* Lớp nền tối mờ khi mở Menu trên Điện thoại */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-slate-900/60 z-30 md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
       )}
 
-      {/* THANH MENU (Sidebar) - Đã cấu hình Responsive trượt ngang */}
       <aside className={`fixed md:relative top-0 left-0 h-screen w-[280px] bg-[#0B1121] flex flex-col shadow-2xl shadow-blue-900/20 z-40 shrink-0 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
         <div className="p-7 flex items-center justify-between border-b border-white/5">
@@ -242,9 +230,7 @@ export default function App() {
               <span className="text-blue-400 text-xs font-bold uppercase tracking-wider">{currentUser.role === 'admin' ? 'Admin Portal' : 'User Portal'}</span>
             </div>
           </div>
-          <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-slate-400 hover:text-white p-1">
-            <X className="w-6 h-6" />
-          </button>
+          <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-slate-400 hover:text-white p-1"><X className="w-6 h-6" /></button>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
@@ -254,11 +240,10 @@ export default function App() {
             { id: 'nhan-vien', label: 'Hồ Sơ Nhân Sự', icon: Users, auth: 'all' },
             { id: 'cham-cong', label: 'Theo Dõi Chấm Công', icon: Clock, auth: 'admin' },
             { id: 'thu-nhap', label: 'Hóa Đơn & Phụ Cấp', icon: FileText, auth: 'admin' },
-            { id: 'luong', label: 'Kết Xuất Bảng Lương', icon: DollarSign, auth: 'all' },
+            { id: 'luong', label: 'Kết Xuất Bảng Lương', icon: DollarSign, auth: 'admin' }, // Chỉ Admin mới có trong mảng này
           ].filter(item => item.auth === 'all' || currentUser.role === 'admin').map((item) => (
             <button key={item.id} onClick={() => { setActiveTab(item.id); setCurrentPage(1); setIsMobileMenuOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 group ${activeTab === item.id ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-xl shadow-blue-900/30 translate-x-1' : 'text-slate-400 hover:text-white hover:bg-white/5'
-                }`}>
+              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 group ${activeTab === item.id ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-xl shadow-blue-900/30 translate-x-1' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
               <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-white' : 'group-hover:text-blue-400 transition-colors'}`} />
               <span>{item.label}</span>
             </button>
@@ -278,10 +263,7 @@ export default function App() {
         </div>
       </aside>
 
-      {/* KHU VỰC NỘI DUNG CHÍNH */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10 bg-slate-50/50 w-full">
-
-        {/* HEADER ĐIỆN THOẠI (Chỉ hiện trên màn hình nhỏ) */}
         <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-200 shadow-sm z-20 sticky top-0">
           <div className="flex items-center gap-3">
             <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-xl"><Calculator className="w-5 h-5 text-white" /></div>
@@ -299,7 +281,8 @@ export default function App() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
               {[
                 { t: 'Tổng Nhân Sự', v: nhanVien.length, i: Users, c: 'blue' },
-                { t: 'Quỹ Lương (Dự kiến)', v: `${Math.round(quyLuongDuToan).toLocaleString()} đ`, i: DollarSign, c: 'emerald' },
+                // ẨN QUỸ LƯƠNG VỚI NHÂN VIÊN
+                { t: 'Quỹ Lương (Dự kiến)', v: currentUser.role === 'admin' ? `${Math.round(quyLuongDuToan).toLocaleString()} đ` : '***', i: DollarSign, c: 'emerald' },
                 { t: 'Tổng Doanh Thu', v: `${Math.round(tongDoanhThu).toLocaleString()} đ`, i: Database, c: 'purple' },
                 { t: 'Phòng Ban', v: phongBan.length, i: LayoutDashboard, c: 'orange' }
               ].map((kpi, idx) => (
@@ -352,7 +335,7 @@ export default function App() {
               <div className="bg-white p-8 md:p-12 rounded-3xl text-center shadow-sm border border-slate-200">
                 <Lock className="w-12 h-12 md:w-16 md:h-16 text-slate-300 mx-auto mb-4" />
                 <h3 className="text-lg md:text-xl font-bold text-slate-700">Dữ liệu phân tích giới hạn</h3>
-                <p className="text-sm md:text-base text-slate-500 mt-2">Chỉ cấp Quản lý (Admin) mới có quyền truy cập báo cáo tổng thể doanh nghiệp.</p>
+                <p className="text-sm md:text-base text-slate-500 mt-2">Chỉ cấp Quản lý (Admin) mới có quyền truy cập biểu đồ và báo cáo chi phí.</p>
               </div>
             )}
           </div>
@@ -398,7 +381,8 @@ export default function App() {
                         <td className="p-4 md:p-5 text-slate-800 font-bold text-base">{nv.Ho_ten}</td>
                         <td className="p-4 md:p-5"><span className="bg-slate-100 text-slate-600 font-bold px-3 py-1.5 rounded-lg text-xs border border-slate-200">{nv.Phong_ban}</span></td>
                         <td className="p-4 md:p-5 text-slate-600 font-medium">{nv.Chuc_vu || 'Nhân viên'}</td>
-                        <td className="p-4 md:p-5 text-slate-800 font-bold">{nv.Luong_co_ban.toLocaleString()} đ</td>
+                        {/* ẨN LƯƠNG CƠ BẢN VỚI NHÂN VIÊN */}
+                        <td className="p-4 md:p-5 text-slate-800 font-bold">{currentUser.role === 'admin' ? `${nv.Luong_co_ban.toLocaleString()} đ` : '***'}</td>
                         <td className="p-4 md:p-5">
                           {currentUser.role === 'admin' ? (
                             <div className="flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
@@ -427,7 +411,6 @@ export default function App() {
           </div>
         )}
 
-        {/* MODAL THÊM / SỬA NHÂN VIÊN */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in">
             <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-[550px] max-h-[90vh] overflow-y-auto border border-slate-200">
@@ -546,7 +529,8 @@ export default function App() {
           </div>
         )}
 
-        {activeTab === 'luong' && (
+        {/* CÒN ADMIN VẪN THẤY BẢNG LƯƠNG NHƯ BÌNH THƯỜNG */}
+        {activeTab === 'luong' && currentUser.role === 'admin' && (
           <div className="p-4 md:p-8 lg:p-10 flex flex-col h-full max-w-[1400px] mx-auto w-full animate-in fade-in">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 md:mb-8 bg-white p-4 md:p-5 rounded-3xl shadow-sm border border-slate-200 shrink-0">
               <div>
@@ -554,17 +538,9 @@ export default function App() {
                 <p className="text-xs md:text-sm text-slate-500 font-medium mt-1">Dựa trên logic: Lương ngày + Tăng ca + Phụ cấp + Hoa hồng - Bảo hiểm - Thuế</p>
               </div>
               <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full lg:w-auto">
-                {currentUser.role === 'admin' && (
-                  <>
-                    <button onClick={handleTinhLuong} className="flex-1 lg:flex-none justify-center bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 md:px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 text-sm md:text-base">
-                      <Calculator className="w-4 h-4 md:w-5 md:h-5" /> <span>Chạy AI Tính Lương</span>
-                    </button>
-                    {/* Nút Xóa Dữ Liệu Lương */}
-                    <button onClick={handleClearLuong} disabled={bangLuong.length === 0} className="flex-1 lg:flex-none justify-center bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 px-3 md:px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors disabled:opacity-50 text-sm md:text-base">
-                      <Trash2 className="w-4 h-4 md:w-5 md:h-5" /> <span>Xóa Dữ Liệu</span>
-                    </button>
-                  </>
-                )}
+                <button onClick={handleTinhLuong} className="flex-1 lg:flex-none justify-center bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 md:px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 text-sm md:text-base">
+                  <Calculator className="w-4 h-4 md:w-5 md:h-5" /> <span>Chạy AI Tính Lương</span>
+                </button>
                 <button onClick={exportToExcel} disabled={bangLuong.length === 0} className="flex-1 lg:flex-none justify-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 md:px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors disabled:opacity-50 text-sm md:text-base">
                   <FileDown className="w-4 h-4 md:w-5 md:h-5" /> Excel
                 </button>
@@ -595,7 +571,7 @@ export default function App() {
                     {bangLuong.length === 0 ? (
                       <tr><td colSpan="7" className="p-10 md:p-16 text-center text-slate-400 font-medium text-base md:text-lg">Chưa có dữ liệu bảng lương. Vui lòng chạy tính toán.</td></tr>
                     ) : (
-                      bangLuong.filter(bl => currentUser.role === 'admin' || bl.Ma_nhan_vien === currentUser.id).map((bl, i) => (
+                      bangLuong.map((bl, i) => (
                         <tr key={i} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 md:p-5 font-bold text-blue-600">{bl.Ma_nhan_vien}</td>
                           <td className="p-4 md:p-5 text-slate-800 font-bold">{bl.Ho_ten}</td>
