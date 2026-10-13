@@ -36,12 +36,11 @@ export default function App() {
   ]);
 
   const [nhanVien, setNhanVien] = useState(() => JSON.parse(localStorage.getItem('nhanVien')) || [
-    { Ma_nhan_vien: 'NV01', Ho_ten: 'Tú Thợ Điên', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV02', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 12000000, Chuc_vu: 'Tester', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 18000000, Chuc_vu: 'Trưởng phòng', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV01', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV02', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 12000000, Chuc_vu: 'Tester', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 18000000, Chuc_vu: 'Trưởng phòng', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'CODE', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV05', Ho_ten: 'Hoàng Yến Nhi', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV06', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV07', Ho_ten: 'Ngô Thái Hòa', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 8000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
   ]);
 
@@ -60,12 +59,18 @@ export default function App() {
 
   const [bangLuong, setBangLuong] = useState(() => JSON.parse(localStorage.getItem('bangLuong')) || []);
 
+  const [doanhThu, setDoanhThu] = useState(() => {
+    const saved = localStorage.getItem('doanhThu');
+    return saved ? JSON.parse(saved) : 75000000;
+  });
+
   useEffect(() => {
     localStorage.setItem('nhanVien', JSON.stringify(nhanVien));
     localStorage.setItem('chamCong', JSON.stringify(chamCong));
     localStorage.setItem('hoaDon', JSON.stringify(hoaDon));
     localStorage.setItem('bangLuong', JSON.stringify(bangLuong));
-  }, [nhanVien, chamCong, hoaDon, bangLuong]);
+    localStorage.setItem('doanhThu', JSON.stringify(doanhThu));
+  }, [nhanVien, chamCong, hoaDon, bangLuong, doanhThu]);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -81,6 +86,24 @@ export default function App() {
     }
   };
 
+  const quyLuongDuToan = bangLuong.length > 0
+    ? bangLuong.reduce((s, i) => s + i.Tong_Thu_Nhap, 0)
+    : nhanVien.reduce((s, nv) => s + nv.Luong_co_ban, 0);
+
+  // ĐÃ BỎ ĐIỀU KIỆN RÀNG BUỘC
+  const handleEditDoanhThu = () => {
+    const newVal = prompt("NHẬP TỔNG DOANH THU MỚI (VNĐ):");
+    if (newVal === null) return;
+
+    const numVal = Number(newVal);
+    if (isNaN(numVal) || numVal < 0) {
+      return alert('Giá trị bạn nhập không hợp lệ!');
+    }
+
+    setDoanhThu(numVal);
+    alert('Cập nhật Tổng Doanh Thu thành công!');
+  };
+
   const handleTinhLuong = () => {
     const ketQua = nhanVien.map(nv => {
       const cc = chamCong.find(c => c.Ma_nhan_vien === nv.Ma_nhan_vien) || { So_ngay_cong: NGUYEN_TAC_NGAY_CONG, Gio_tang_ca: 0 };
@@ -89,8 +112,8 @@ export default function App() {
       const tienTangCa = cc.Gio_tang_ca * luongGio * 1.5;
       const tongPhuCap = phuCap.reduce((sum, pc) => sum + pc.So_tien, 0);
       const hdNhanVien = hoaDon.filter(h => h.Ma_nhan_vien === nv.Ma_nhan_vien);
-      const doanhThu = hdNhanVien.reduce((sum, h) => sum + h.Gia_tri, 0);
-      const hoaHong = nv.Phong_ban === 'Phòng Kinh Doanh' ? doanhThu * 0.05 : 0;
+      const doanhThuNhanVien = hdNhanVien.reduce((sum, h) => sum + h.Gia_tri, 0);
+      const hoaHong = nv.Phong_ban === 'Phòng Kinh Doanh' ? doanhThuNhanVien * 0.05 : 0;
       const tongThuNhap = luongThucTe + tienTangCa + tongPhuCap + hoaHong;
       const baoHiem = nv.Luong_co_ban * 0.105;
       const thuNhapChiuThue = tongThuNhap - baoHiem;
@@ -172,19 +195,19 @@ export default function App() {
     if (!maNV) return;
     const giaTri = prompt("Nhập Giá trị Hóa đơn (VNĐ) - Ví dụ: 15000000:");
     if (!giaTri || isNaN(giaTri)) return alert("Giá trị không hợp lệ!");
-    setHoaDon([...hoaDon, { Ma_HD: maHD, Ma_nhan_vien: maNV, Gia_tri: Number(giaTri) }]);
+
+    const giaTriNum = Number(giaTri);
+    setHoaDon([...hoaDon, { Ma_HD: maHD, Ma_nhan_vien: maNV, Gia_tri: giaTriNum }]);
+    setDoanhThu(prev => prev + giaTriNum); // Tự động cộng vào Doanh Thu Tổng
   };
 
   const handleDeleteHoaDon = (id) => {
     if (window.confirm("Xóa hóa đơn này sẽ làm giảm Tổng Doanh Thu. Tiếp tục?")) {
-      setHoaDon(hoaDon.filter(hd => hd.Ma_HD !== id));
+      const hd = hoaDon.find(h => h.Ma_HD === id);
+      setHoaDon(hoaDon.filter(h => h.Ma_HD !== id));
+      setDoanhThu(prev => Math.max(0, prev - (hd ? hd.Gia_tri : 0))); // Tự động trừ khỏi Doanh Thu Tổng
     }
   };
-
-  const quyLuongDuToan = bangLuong.length > 0
-    ? bangLuong.reduce((s, i) => s + i.Tong_Thu_Nhap, 0)
-    : nhanVien.reduce((s, nv) => s + nv.Luong_co_ban, 0);
-  const tongDoanhThu = hoaDon.reduce((s, h) => s + h.Gia_tri, 0);
 
   if (!currentUser) {
     return (
@@ -241,7 +264,7 @@ export default function App() {
             { id: 'nhan-vien', label: 'Hồ Sơ Nhân Sự', icon: Users, auth: 'all' },
             { id: 'cham-cong', label: 'Theo Dõi Chấm Công', icon: Clock, auth: 'admin' },
             { id: 'thu-nhap', label: 'Hóa Đơn & Phụ Cấp', icon: FileText, auth: 'admin' },
-            { id: 'luong', label: 'Kết Xuất Bảng Lương', icon: DollarSign, auth: 'admin' }, // Chỉ Admin mới có trong mảng này
+            { id: 'luong', label: 'Kết Xuất Bảng Lương', icon: DollarSign, auth: 'admin' },
           ].filter(item => item.auth === 'all' || currentUser.role === 'admin').map((item) => (
             <button key={item.id} onClick={() => { setActiveTab(item.id); setCurrentPage(1); setIsMobileMenuOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-300 group ${activeTab === item.id ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-xl shadow-blue-900/30 translate-x-1' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
@@ -282,17 +305,27 @@ export default function App() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
               {[
                 { t: 'Tổng Nhân Sự', v: nhanVien.length, i: Users, c: 'blue' },
-                // ẨN QUỸ LƯƠNG VỚI NHÂN VIÊN
                 { t: 'Quỹ Lương (Dự kiến)', v: currentUser.role === 'admin' ? `${Math.round(quyLuongDuToan).toLocaleString()} đ` : '***', i: DollarSign, c: 'emerald' },
-                { t: 'Tổng Doanh Thu', v: `${Math.round(tongDoanhThu).toLocaleString()} đ`, i: Database, c: 'purple' },
+                { t: 'Tổng Doanh Thu', v: currentUser.role === 'admin' ? `${Math.round(doanhThu).toLocaleString()} đ` : '***', i: Database, c: 'purple', onEdit: handleEditDoanhThu },
                 { t: 'Phòng Ban', v: phongBan.length, i: LayoutDashboard, c: 'orange' }
               ].map((kpi, idx) => (
-                <div key={idx} className="bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <div key={idx} className="bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative group">
                   <div className="flex items-center gap-4">
                     <div className={`p-3 md:p-4 rounded-2xl bg-${kpi.c}-50 text-${kpi.c}-600 ring-1 ring-${kpi.c}-100 shrink-0`}><kpi.i className="w-6 h-6 md:w-7 md:h-7" /></div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs md:text-sm font-semibold text-slate-500 mb-1 truncate">{kpi.t}</p>
-                      <p className="text-lg md:text-xl lg:text-2xl font-black text-slate-800 truncate" title={kpi.v}>{kpi.v}</p>
+
+                      {/* Box chứa số lượng / Giá trị và Nút Edit */}
+                      <div className="flex items-center justify-between">
+                        <p className="text-lg md:text-xl lg:text-2xl font-black text-slate-800 truncate" title={kpi.v}>{kpi.v}</p>
+
+                        {kpi.onEdit && currentUser.role === 'admin' && (
+                          <button onClick={kpi.onEdit} className="p-1.5 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-200 opacity-0 group-hover:opacity-100 transition-opacity" title="Sửa Tổng Doanh Thu">
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+
                     </div>
                   </div>
                 </div>
@@ -382,7 +415,6 @@ export default function App() {
                         <td className="p-4 md:p-5 text-slate-800 font-bold text-base">{nv.Ho_ten}</td>
                         <td className="p-4 md:p-5"><span className="bg-slate-100 text-slate-600 font-bold px-3 py-1.5 rounded-lg text-xs border border-slate-200">{nv.Phong_ban}</span></td>
                         <td className="p-4 md:p-5 text-slate-600 font-medium">{nv.Chuc_vu || 'Nhân viên'}</td>
-                        {/* ẨN LƯƠNG CƠ BẢN VỚI NHÂN VIÊN */}
                         <td className="p-4 md:p-5 text-slate-800 font-bold">{currentUser.role === 'admin' ? `${nv.Luong_co_ban.toLocaleString()} đ` : '***'}</td>
                         <td className="p-4 md:p-5">
                           {currentUser.role === 'admin' ? (
@@ -530,7 +562,6 @@ export default function App() {
           </div>
         )}
 
-        {/* CÒN ADMIN VẪN THẤY BẢNG LƯƠNG NHƯ BÌNH THƯỜNG */}
         {activeTab === 'luong' && currentUser.role === 'admin' && (
           <div className="p-4 md:p-8 lg:p-10 flex flex-col h-full max-w-[1400px] mx-auto w-full animate-in fade-in">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 md:mb-8 bg-white p-4 md:p-5 rounded-3xl shadow-sm border border-slate-200 shrink-0">
