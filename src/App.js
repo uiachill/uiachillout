@@ -36,12 +36,14 @@ export default function App() {
   ]);
 
   const [nhanVien, setNhanVien] = useState(() => JSON.parse(localStorage.getItem('nhanVien')) || [
-    { Ma_nhan_vien: 'NV01', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV02', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 12000000, Chuc_vu: 'Tester', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 18000000, Chuc_vu: 'Trưởng phòng', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'CODE', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV05', Ho_ten: 'Hoàng Yến Nhi', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV01', Ho_ten: 'Tú Thợ Điện', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV02', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV03', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 12000000, Chuc_vu: 'Tester', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV04', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 18000000, Chuc_vu: 'Trưởng phòng', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV05', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'CODE', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV06', Ho_ten: 'Hoàng Yến Nhi', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV07', Ho_ten: 'Ngô Thái Hòa', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 8000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV08', Ho_ten: 'Cái Minh Hùng', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
   ]);
 
   const [chamCong, setChamCong] = useState(() => JSON.parse(localStorage.getItem('chamCong')) || nhanVien.map(nv => ({
@@ -61,7 +63,7 @@ export default function App() {
 
   const [doanhThu, setDoanhThu] = useState(() => {
     const saved = localStorage.getItem('doanhThu');
-    return saved ? JSON.parse(saved) : 75000000;
+    return saved ? JSON.parse(saved) : 75000000000;
   });
 
   useEffect(() => {
