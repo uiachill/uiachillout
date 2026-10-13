@@ -38,10 +38,10 @@ export default function App() {
   const [nhanVien, setNhanVien] = useState(() => JSON.parse(localStorage.getItem('nhanVien')) || [
     { Ma_nhan_vien: 'NV01', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV02', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 12000000, Chuc_vu: 'Tester', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kỹ Thuật ', Luong_co_ban: 18000000, Chuc_vu: 'Lập Trình Viên', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'Trưởng Nhóm', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 18000000, Chuc_vu: 'Lập Trình Viên', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'Trưởng phòng', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV05', Ho_ten: 'Hoàng Yến Nhi', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV06', Ho_ten: 'Tú Thợ Điện', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập Trình Viên', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV06', Ho_ten: 'Tú Thợ Điện', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 11000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV07', Ho_ten: 'Ngô Thái Hòa', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 8000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
   ]);
 
@@ -153,7 +153,6 @@ export default function App() {
     doc.save("BangLuong.pdf");
   };
 
-  // Lọc hiển thị nhân viên: User thường CHỈ nhìn thấy dòng của chính họ
   const filteredEmployees = useMemo(() => {
     return nhanVien.filter(nv => {
       const matchSearch = nv.Ho_ten.toLowerCase().includes(searchTerm.toLowerCase()) || nv.Ma_nhan_vien.toLowerCase().includes(searchTerm.toLowerCase());
@@ -176,7 +175,6 @@ export default function App() {
       setChamCong([...chamCong, { Ma_nhan_vien: formData.Ma_nhan_vien, So_ngay_cong: NGUYEN_TAC_NGAY_CONG, So_ngay_nghi: 0, Gio_tang_ca: 0 }]);
     }
 
-    // Reset bảng lương cũ để ép Dashboard cập nhật Quỹ lương mới nhất
     setBangLuong([]);
     setIsModalOpen(false);
   };
@@ -187,7 +185,6 @@ export default function App() {
       setChamCong(chamCong.filter(cc => cc.Ma_nhan_vien !== id));
       setHoaDon(hoaDon.filter(hd => hd.Ma_nhan_vien !== id));
 
-      // Xóa dữ liệu rác trong bảng lương để số liệu biểu đồ được khớp
       setBangLuong([]);
     }
   };
@@ -404,8 +401,8 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-0">
-              <div className="overflow-x-auto overflow-y-auto flex-1">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-0 w-full overflow-hidden">
+              <div className="overflow-auto flex-1 w-full">
                 <table className="w-full text-left border-collapse whitespace-nowrap min-w-[700px]">
                   <thead className="bg-slate-50/90 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-200 shadow-sm">
                     <tr>
@@ -419,12 +416,9 @@ export default function App() {
                       <tr key={nv.Ma_nhan_vien} className="hover:bg-blue-50/40 transition-colors group">
                         <td className="p-4 md:p-5 font-bold text-blue-600">{nv.Ma_nhan_vien}</td>
                         <td className="p-4 md:p-5 text-slate-800 font-bold text-base">{nv.Ho_ten}</td>
-
-                        {/* CHỈNH SỬA Ở ĐÂY: Hiển thị đầy đủ chức vụ, phòng ban và tiền lương cho nhân viên (vì họ chỉ thấy dòng của chính họ) */}
                         <td className="p-4 md:p-5"><span className="bg-slate-100 text-slate-600 font-bold px-3 py-1.5 rounded-lg text-xs border border-slate-200">{nv.Phong_ban}</span></td>
                         <td className="p-4 md:p-5 text-slate-600 font-medium">{nv.Chuc_vu || 'Nhân viên'}</td>
                         <td className="p-4 md:p-5 text-slate-800 font-bold">{nv.Luong_co_ban.toLocaleString()} đ</td>
-
                         <td className="p-4 md:p-5">
                           {currentUser.role === 'admin' ? (
                             <div className="flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
@@ -508,8 +502,8 @@ export default function App() {
               <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Quản Lý Chấm Công</h2>
               <div className="w-full sm:w-auto justify-center bg-amber-100 text-amber-700 px-4 py-2 rounded-xl font-bold flex items-center gap-2"><Clock className="w-5 h-5" /> Tháng hiện tại: {NGUYEN_TAC_NGAY_CONG} ngày chuẩn</div>
             </div>
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-0">
-              <div className="overflow-x-auto overflow-y-auto flex-1">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-0 w-full overflow-hidden">
+              <div className="overflow-auto flex-1 w-full">
                 <table className="w-full text-left relative whitespace-nowrap min-w-[500px]">
                   <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10 shadow-sm">
                     <tr><th className="p-4 md:p-5 font-black text-slate-500 uppercase tracking-widest">Mã NV</th><th className="p-4 md:p-5 font-black text-slate-500 uppercase tracking-widest">Ngày đi làm thực tế</th><th className="p-4 md:p-5 font-black text-slate-500 uppercase tracking-widest">Giờ Tăng Ca</th></tr>
@@ -544,10 +538,10 @@ export default function App() {
               </button>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6">
+              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6 w-full overflow-hidden">
                 <h3 className="text-base md:text-lg font-bold text-slate-800 mb-2 md:mb-4 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" /> Hóa Đơn Phát Sinh (Kinh Doanh)</h3>
                 <p className="text-xs md:text-sm text-slate-500 mb-4">Nhân viên lập hóa đơn sẽ được AI cộng 5% hoa hồng vào lương.</p>
-                <div className="overflow-y-auto overflow-x-auto max-h-[400px]">
+                <div className="overflow-auto max-h-[400px] w-full">
                   <table className="w-full text-left bg-slate-50 rounded-xl overflow-hidden relative whitespace-nowrap min-w-[400px]">
                     <thead className="bg-slate-100 sticky top-0"><tr><th className="p-3 text-xs font-bold text-slate-600 uppercase">Mã HD</th><th className="p-3 text-xs font-bold text-slate-600 uppercase">Mã NV</th><th className="p-3 text-xs font-bold text-slate-600 uppercase">Giá Trị (VNĐ)</th><th className="p-3 text-center">Thao tác</th></tr></thead>
                     <tbody className="divide-y divide-slate-200">{hoaDon.map(hd => <tr key={hd.Ma_HD} className="hover:bg-white group"><td className="p-3 font-semibold">{hd.Ma_HD}</td><td className="p-3 text-blue-600 font-bold">{hd.Ma_nhan_vien}</td><td className="p-3 text-emerald-600 font-bold">{hd.Gia_tri.toLocaleString()} đ</td>
@@ -558,9 +552,9 @@ export default function App() {
                   </table>
                 </div>
               </div>
-              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6">
+              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6 w-full overflow-hidden">
                 <h3 className="text-base md:text-lg font-bold text-slate-800 mb-2 md:mb-4 flex items-center gap-2"><Award className="w-5 h-5 text-purple-500" /> Phụ Cấp Cố Định (Toàn công ty)</h3>
-                <div className="overflow-x-auto">
+                <div className="overflow-auto w-full">
                   <table className="w-full text-left bg-slate-50 rounded-xl overflow-hidden whitespace-nowrap min-w-[300px]">
                     <thead className="bg-slate-100"><tr><th className="p-3 text-xs font-bold text-slate-600 uppercase">Loại Phụ Cấp</th><th className="p-3 text-xs font-bold text-slate-600 uppercase">Số Tiền (VNĐ)</th></tr></thead>
                     <tbody className="divide-y divide-slate-200">{phuCap.map((pc, i) => <tr key={i}><td className="p-3 font-semibold">{pc.Loai}</td><td className="p-3 text-emerald-600 font-bold">+{pc.So_tien.toLocaleString()} đ</td></tr>)}</tbody>
@@ -580,7 +574,7 @@ export default function App() {
               </div>
               <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full lg:w-auto">
                 <button onClick={handleTinhLuong} className="flex-1 lg:flex-none justify-center bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 md:px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 text-sm md:text-base">
-                  <Calculator className="w-4 h-4 md:w-5 md:h-5" /> <span>Chạy AI Tính Lương</span>
+                  <Calculator className="w-4 h-4 md:w-5 md:h-5" /> <span>Tính Lương</span>
                 </button>
                 <button onClick={exportToExcel} disabled={bangLuong.length === 0} className="flex-1 lg:flex-none justify-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 md:px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors disabled:opacity-50 text-sm md:text-base">
                   <FileDown className="w-4 h-4 md:w-5 md:h-5" /> Excel
@@ -594,8 +588,8 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-0 print:shadow-none print:border-none print:overflow-visible">
-              <div className="overflow-x-auto overflow-y-auto flex-1">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-0 w-full overflow-hidden print:shadow-none print:border-none print:overflow-visible">
+              <div className="overflow-auto flex-1 w-full">
                 <table className="w-full text-left border-collapse whitespace-nowrap min-w-[1000px]">
                   <thead className="bg-slate-50/90 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-200 shadow-sm print:bg-white print:relative">
                     <tr>
