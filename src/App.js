@@ -36,14 +36,13 @@ export default function App() {
   ]);
 
   const [nhanVien, setNhanVien] = useState(() => JSON.parse(localStorage.getItem('nhanVien')) || [
-    { Ma_nhan_vien: 'NV01', Ho_ten: 'Tú Thợ Điện', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV02', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV03', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 12000000, Chuc_vu: 'Tester', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV04', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 18000000, Chuc_vu: 'Coder', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV05', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'Chủ Tịch', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV06', Ho_ten: 'Hoàng Yến Nhi', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV01', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV02', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 12000000, Chuc_vu: 'Tester', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kỹ Thuật ', Luong_co_ban: 18000000, Chuc_vu: 'Lập Trình Viên', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'Trưởng Nhóm', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV05', Ho_ten: 'Hoàng Yến Nhi', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV06', Ho_ten: 'Tú Thợ Điện', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập Trình Viên', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV07', Ho_ten: 'Ngô Thái Hòa', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 8000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV08', Ho_ten: 'Cái Minh Hùng', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
   ]);
 
   const [chamCong, setChamCong] = useState(() => JSON.parse(localStorage.getItem('chamCong')) || nhanVien.map(nv => ({
@@ -63,7 +62,7 @@ export default function App() {
 
   const [doanhThu, setDoanhThu] = useState(() => {
     const saved = localStorage.getItem('doanhThu');
-    return saved ? JSON.parse(saved) : 75000000000;
+    return saved ? JSON.parse(saved) : 75000000;
   });
 
   useEffect(() => {
@@ -92,7 +91,6 @@ export default function App() {
     ? bangLuong.reduce((s, i) => s + i.Tong_Thu_Nhap, 0)
     : nhanVien.reduce((s, nv) => s + nv.Luong_co_ban, 0);
 
-  // ĐÃ BỎ ĐIỀU KIỆN RÀNG BUỘC
   const handleEditDoanhThu = () => {
     const newVal = prompt("NHẬP TỔNG DOANH THU MỚI (VNĐ):");
     if (newVal === null) return;
@@ -155,6 +153,7 @@ export default function App() {
     doc.save("BangLuong.pdf");
   };
 
+  // Lọc hiển thị nhân viên: User thường CHỈ nhìn thấy dòng của chính họ
   const filteredEmployees = useMemo(() => {
     return nhanVien.filter(nv => {
       const matchSearch = nv.Ho_ten.toLowerCase().includes(searchTerm.toLowerCase()) || nv.Ma_nhan_vien.toLowerCase().includes(searchTerm.toLowerCase());
@@ -176,6 +175,9 @@ export default function App() {
       setNhanVien([...nhanVien, formData]);
       setChamCong([...chamCong, { Ma_nhan_vien: formData.Ma_nhan_vien, So_ngay_cong: NGUYEN_TAC_NGAY_CONG, So_ngay_nghi: 0, Gio_tang_ca: 0 }]);
     }
+
+    // Reset bảng lương cũ để ép Dashboard cập nhật Quỹ lương mới nhất
+    setBangLuong([]);
     setIsModalOpen(false);
   };
 
@@ -184,6 +186,9 @@ export default function App() {
       setNhanVien(nhanVien.filter(nv => nv.Ma_nhan_vien !== id));
       setChamCong(chamCong.filter(cc => cc.Ma_nhan_vien !== id));
       setHoaDon(hoaDon.filter(hd => hd.Ma_nhan_vien !== id));
+
+      // Xóa dữ liệu rác trong bảng lương để số liệu biểu đồ được khớp
+      setBangLuong([]);
     }
   };
 
@@ -200,14 +205,14 @@ export default function App() {
 
     const giaTriNum = Number(giaTri);
     setHoaDon([...hoaDon, { Ma_HD: maHD, Ma_nhan_vien: maNV, Gia_tri: giaTriNum }]);
-    setDoanhThu(prev => prev + giaTriNum); // Tự động cộng vào Doanh Thu Tổng
+    setDoanhThu(prev => prev + giaTriNum);
   };
 
   const handleDeleteHoaDon = (id) => {
     if (window.confirm("Xóa hóa đơn này sẽ làm giảm Tổng Doanh Thu. Tiếp tục?")) {
       const hd = hoaDon.find(h => h.Ma_HD === id);
       setHoaDon(hoaDon.filter(h => h.Ma_HD !== id));
-      setDoanhThu(prev => Math.max(0, prev - (hd ? hd.Gia_tri : 0))); // Tự động trừ khỏi Doanh Thu Tổng
+      setDoanhThu(prev => Math.max(0, prev - (hd ? hd.Gia_tri : 0)));
     }
   };
 
@@ -317,7 +322,6 @@ export default function App() {
                     <div className="min-w-0 flex-1">
                       <p className="text-xs md:text-sm font-semibold text-slate-500 mb-1 truncate">{kpi.t}</p>
 
-                      {/* Box chứa số lượng / Giá trị và Nút Edit */}
                       <div className="flex items-center justify-between">
                         <p className="text-lg md:text-xl lg:text-2xl font-black text-slate-800 truncate" title={kpi.v}>{kpi.v}</p>
 
@@ -415,9 +419,12 @@ export default function App() {
                       <tr key={nv.Ma_nhan_vien} className="hover:bg-blue-50/40 transition-colors group">
                         <td className="p-4 md:p-5 font-bold text-blue-600">{nv.Ma_nhan_vien}</td>
                         <td className="p-4 md:p-5 text-slate-800 font-bold text-base">{nv.Ho_ten}</td>
+
+                        {/* CHỈNH SỬA Ở ĐÂY: Hiển thị đầy đủ chức vụ, phòng ban và tiền lương cho nhân viên (vì họ chỉ thấy dòng của chính họ) */}
                         <td className="p-4 md:p-5"><span className="bg-slate-100 text-slate-600 font-bold px-3 py-1.5 rounded-lg text-xs border border-slate-200">{nv.Phong_ban}</span></td>
                         <td className="p-4 md:p-5 text-slate-600 font-medium">{nv.Chuc_vu || 'Nhân viên'}</td>
-                        <td className="p-4 md:p-5 text-slate-800 font-bold">{currentUser.role === 'admin' ? `${nv.Luong_co_ban.toLocaleString()} đ` : '***'}</td>
+                        <td className="p-4 md:p-5 text-slate-800 font-bold">{nv.Luong_co_ban.toLocaleString()} đ</td>
+
                         <td className="p-4 md:p-5">
                           {currentUser.role === 'admin' ? (
                             <div className="flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
