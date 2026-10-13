@@ -62,7 +62,7 @@ export default function App() {
 
   const [doanhThu, setDoanhThu] = useState(() => {
     const saved = localStorage.getItem('doanhThu');
-    return saved ? JSON.parse(saved) : 75000000;
+    return saved ? JSON.parse(saved) : 75000000000;
   });
 
   useEffect(() => {
