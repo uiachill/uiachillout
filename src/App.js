@@ -6,10 +6,20 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable'; // Sửa cách import autoTable
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 const NGUYEN_TAC_NGAY_CONG = 31;
+
+// Hàm hỗ trợ xóa dấu tiếng Việt giúp jsPDF không bị lỗi font/mã hóa
+const removeAccents = (str) => {
+  if (!str) return '';
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+};
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -39,9 +49,9 @@ export default function App() {
     { Ma_nhan_vien: 'NV01', Ho_ten: 'Nguyễn Nhật Minh', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 15000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV02', Ho_ten: 'Đỗ Thị Trà My', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 12000000, Chuc_vu: 'Tester', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV03', Ho_ten: 'Nguyễn Tuấn Minh', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 18000000, Chuc_vu: 'Lập Trình Viên', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'Trưởng phòng', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV04', Ho_ten: 'Phạm Đình An', Phong_ban: 'Phòng Nhân Sự', Luong_co_ban: 14000000, Chuc_vu: 'Trưởng Phòng', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV05', Ho_ten: 'Hoàng Yến Nhi', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
-    { Ma_nhan_vien: 'NV06', Ho_ten: 'Tú Thợ Điện', Phong_ban: 'Phòng Kỹ Thuật', Luong_co_ban: 11000000, Chuc_vu: 'Lập trình viên', Mat_khau: '123456' },
+    { Ma_nhan_vien: 'NV06', Ho_ten: 'Tú Thợ Điện', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 11000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
     { Ma_nhan_vien: 'NV07', Ho_ten: 'Ngô Thái Hòa', Phong_ban: 'Phòng Kinh Doanh', Luong_co_ban: 8000000, Chuc_vu: 'Sales', Mat_khau: '123456' },
   ]);
 
@@ -62,7 +72,7 @@ export default function App() {
 
   const [doanhThu, setDoanhThu] = useState(() => {
     const saved = localStorage.getItem('doanhThu');
-    return saved ? JSON.parse(saved) : 75000000000;
+    return saved ? JSON.parse(saved) : 75000000;
   });
 
   useEffect(() => {
@@ -140,17 +150,32 @@ export default function App() {
     XLSX.writeFile(wb, "BangLuong_Thang.xlsx");
   };
 
+  // Hàm xuất PDF đã được sửa lỗi
   const exportToPDF = () => {
-    const doc = new jsPDF();
-    doc.text("BANG LUONG NHAN VIEN - SMART PAYROLL", 14, 15);
-    const tableColumn = ["Ma NV", "Ho Ten", "Phong Ban", "Tong Thu Nhap", "Thuc Lanh"];
-    const tableRows = bangLuong.map(bl => [
-      bl.Ma_nhan_vien, bl.Ho_ten, bl.Phong_ban,
-      `${Math.round(bl.Tong_Thu_Nhap).toLocaleString()} VND`,
-      `${Math.round(bl.Thuc_Lanh).toLocaleString()} VND`
-    ]);
-    doc.autoTable({ head: [tableColumn], body: tableRows, startY: 20 });
-    doc.save("BangLuong.pdf");
+    try {
+      const doc = new jsPDF();
+      doc.text("BANG LUONG NHAN VIEN - SMART PAYROLL", 14, 15);
+
+      const tableColumn = ["Ma NV", "Ho Ten", "Phong Ban", "Tong Thu Nhap", "Thuc Lanh"];
+      const tableRows = bangLuong.map(bl => [
+        bl.Ma_nhan_vien,
+        removeAccents(bl.Ho_ten),
+        removeAccents(bl.Phong_ban),
+        `${Math.round(bl.Tong_Thu_Nhap).toLocaleString()} VND`,
+        `${Math.round(bl.Thuc_Lanh).toLocaleString()} VND`
+      ]);
+
+      if (typeof autoTable === 'function') {
+        autoTable(doc, { head: [tableColumn], body: tableRows, startY: 20 });
+      } else if (typeof doc.autoTable === 'function') {
+        doc.autoTable({ head: [tableColumn], body: tableRows, startY: 20 });
+      }
+
+      doc.save("BangLuong.pdf");
+    } catch (error) {
+      console.error("Lỗi xuất PDF:", error);
+      alert("Không thể xuất PDF: " + error.message);
+    }
   };
 
   const filteredEmployees = useMemo(() => {
@@ -574,7 +599,7 @@ export default function App() {
               </div>
               <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full lg:w-auto">
                 <button onClick={handleTinhLuong} className="flex-1 lg:flex-none justify-center bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 md:px-5 py-2.5 rounded-2xl flex items-center gap-2 font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-95 text-sm md:text-base">
-                  <Calculator className="w-4 h-4 md:w-5 md:h-5" /> <span>Tính Lương</span>
+                  <Calculator className="w-4 h-4 md:w-5 md:h-5" /> <span>Chạy AI Tính Lương</span>
                 </button>
                 <button onClick={exportToExcel} disabled={bangLuong.length === 0} className="flex-1 lg:flex-none justify-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 md:px-4 py-2.5 rounded-2xl flex items-center gap-2 font-bold transition-colors disabled:opacity-50 text-sm md:text-base">
                   <FileDown className="w-4 h-4 md:w-5 md:h-5" /> Excel
